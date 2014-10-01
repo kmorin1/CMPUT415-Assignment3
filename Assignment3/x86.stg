@@ -1,0 +1,181 @@
+group x86;
+
+
+assemblyOut(vars, assi, state) ::= <<
+global main
+
+extern printf
+
+section .data
+_format_string: DB "%d", 0xA, 0
+<vars: { a | <a>: DD 0 <\n>}>
+section .text
+main:
+  <assi:{ b | <b>}>
+  <state> 
+  mov eax, 0
+  ret
+>>
+
+compose(final) ::= <<
+<final>
+>>
+
+outputAssi(var, value) ::= <<
+
+<value>
+
+pop eax
+mov dword [<var>], eax
+
+>>
+
+outputPrint(value) ::= <<
+
+<value>
+
+push _format_string 
+call printf         
+add esp, 8          
+
+>>
+
+outputIf(a, b, c) ::= <<
+
+<a>
+
+pop eax
+cmp eax, 0
+jz branch<c>
+
+<b>
+
+branch<c>:
+
+>>
+
+
+outputWhile(a, b, c, d) ::= <<
+
+branch<c>:
+<a>
+
+pop eax
+cmp eax, 0
+jz branch<d>
+
+<b>
+
+<a>
+
+pop eax
+cmp eax, 0
+jnz branch<c>
+
+branch<d>:
+
+>>
+
+eExpr(a, b) ::= <<
+<a>
+
+<b>
+
+pop eax
+pop ebx
+cmp ebx, eax
+sete cl
+movzx ecx, cl
+push ecx
+>>
+
+neExpr(a, b) ::= <<
+<a>
+
+<b>
+
+pop eax
+pop ebx
+cmp ebx, eax
+setne cl
+movzx ecx, cl
+push ecx
+>>
+
+ltExpr(a, b) ::= <<
+<a>
+
+<b>
+
+pop eax
+pop ebx
+cmp ebx, eax
+setl cl
+movzx ecx, cl
+push ecx
+>>
+
+gtExpr(a, b) ::= <<
+<a>
+
+<b>
+
+pop eax
+pop ebx
+cmp ebx, eax
+setg cl
+movzx ecx, cl
+push ecx
+>>
+
+addExpr(a, b) ::= <<
+<a>
+
+<b>
+
+pop ebx
+pop eax
+add eax, ebx
+push eax
+>>
+
+subExpr(a, b) ::= <<
+<a>
+
+<b>
+pop ebx
+pop eax
+sub eax, ebx
+push eax
+>>
+
+mulExpr(a, b) ::= <<
+<a>
+
+<b>
+
+pop ebx
+pop eax
+imul eax, ebx
+push eax
+>>
+
+divExpr(a, b) ::= <<
+<a>
+
+<b>
+
+pop ebx
+pop eax
+xor edx, edx
+idiv ebx
+push eax
+>>
+
+pushInt(num) ::= <<
+push <num>
+>>
+
+pushVar(var) ::= <<
+push dword [<var>]
+>>

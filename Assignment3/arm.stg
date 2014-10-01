@@ -1,0 +1,188 @@
+group arm;
+
+assemblyOut(vars, assi, state) ::= <<
+.arch armv7-a
+.data
+_format_string: .asciz "%d\n"
+<vars: { a | <a>: .word 0 <\n>}>
+.text
+.globl main
+main:
+  <assi:{ b | <b>}>
+  <state> 
+  mov r0, #0
+  mov r1, #1
+  swi 0
+>>
+
+compose(final) ::= <<
+<final>
+>>
+
+outputAssi(var, value) ::= <<
+
+<value>
+
+pop {r4}
+ldr r5, =<var>
+str r4, [r5]
+
+>>
+
+outputPrint(value) ::= <<
+
+<value>
+
+pop {r1}
+
+ldr r0, =_format_string
+bl printf         
+mov r0, #0         
+
+>>
+
+outputIf(a, b, c) ::= <<
+
+<a>
+
+pop {r4}
+mov r5, #0
+cmp r4, r5
+beq branch<c>
+
+<b>
+
+branch<c>:
+
+>>
+
+
+outputWhile(a, b, c, d) ::= <<
+
+branch<c>:
+<a>
+
+pop {r4}
+mov r5, #0
+cmp r4, r5 
+beq branch<d>
+
+<b>
+
+<a>
+
+pop {r4}
+mov r5, #0
+cmp r4, r5
+bne branch<c>
+
+branch<d>:
+
+>>
+
+eExpr(a, b) ::= <<
+<a>
+
+<b>
+
+pop {r5}
+pop {r4}
+mov r6, #0
+cmp r4, r5
+moveq r6, #1
+push {r6}
+>>
+
+neExpr(a, b) ::= <<
+<a>
+
+<b>
+
+pop {r5}
+pop {r4}
+mov r6, #0
+cmp r4, r5
+movne r6, #1
+push {r6}
+>>
+
+ltExpr(a, b) ::= <<
+<a>
+
+<b>
+
+pop {r5}
+pop {r4}
+mov r6, #0
+cmp r4, r5
+movlt r6, #1
+push {r6}
+>>
+
+gtExpr(a, b) ::= <<
+<a>
+
+<b>
+
+pop {r5}
+pop {r4}
+mov r6, #0
+cmp r4, r5
+movgt r6, #1
+push {r6}
+>>
+
+addExpr(a, b) ::= <<
+<a>
+
+<b>
+
+pop {r5}
+pop {r4}
+add r6, r4, r5
+push {r6}
+>>
+
+subExpr(a, b) ::= <<
+<a>
+
+<b>
+
+pop {r5}
+pop {r4}
+sub r6, r4, r5
+push {r6}
+>>
+
+mulExpr(a, b) ::= <<
+<a>
+
+<b>
+
+pop {r5}
+pop {r4}
+mul r6, r4, r5
+push {r6}
+>>
+
+divExpr(a, b) ::= <<
+<a>
+
+<b>
+
+pop {r1}
+pop {r0}
+bl __aeabi_idiv(PLT)
+push {r0}
+>>
+
+pushInt(num) ::= <<
+mov r4, #<num>
+push {r4}
+>>
+
+pushVar(var) ::= <<
+ldr r4, =<var>
+ldr r5, [r4]
+push {r5}
+>>

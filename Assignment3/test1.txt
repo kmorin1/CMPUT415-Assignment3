@@ -1,0 +1,23 @@
+int i = 1;
+int p = 1;
+int d1 = 1;
+int isPrime = 1;
+
+loop (p < 1000)
+    i=1;
+    isPrime=1;
+    p=p+1;
+    
+    loop(i < p/2)
+        i=i+1;
+
+        if ((p/i) * i == p)
+            isPrime = 0;
+            i = p;
+        fi;
+    pool;
+
+    if (isPrime)
+        print(p);
+    fi;
+pool;

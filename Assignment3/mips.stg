@@ -1,0 +1,193 @@
+group mips;
+
+assemblyOut(vars, assi, state) ::= <<
+.data
+_newline: .asciiz "\n"
+<vars: { a | <a>: .word 0 <\n>}>
+.text
+main:
+  <assi:{ b | <b>}>
+  <state> 
+  li $v0, 10
+  syscall
+>>
+
+compose(final) ::= <<
+<final>
+>>
+
+outputAssi(var, value) ::= <<
+
+<value>
+
+lw $a0, 4($sp)
+addi $sp, $sp, 4
+sw $a0, <var>
+
+>>
+
+outputPrint(value) ::= <<
+
+<value>
+
+lw $a0 4($sp)
+addi $sp, $sp, 4
+li $v0, 1
+syscall
+la $a0, _newline
+li $v0, 4
+syscall 
+
+>>
+
+outputIf(a, b, c) ::= <<
+
+<a>
+
+lw $a0 4($sp)
+addi $sp, $sp, 4
+beq $zero, $a0, branch<c>
+
+<b>
+
+branch<c>:
+
+>>
+
+
+outputWhile(a, b, c, d) ::= <<
+
+branch<c>:
+<a>
+
+lw $a0 4($sp)
+addi $sp, $sp, 4
+beq $zero, $a0, branch<d>
+
+<b>
+
+<a>
+
+lw $a0 4($sp)
+addi $sp, $sp, 4
+bne $zero, $a0, branch<c>
+
+branch<d>:
+
+>>
+
+eExpr(a, b) ::= <<
+<a>
+
+<b>
+
+lw $a0 4($sp)
+lw $t0 8($sp)
+seq $a0 $a0 $t0
+addi $sp $sp 8
+sw $a0, 0($sp)
+addiu $sp, $sp, -4
+>>
+
+neExpr(a, b) ::= <<
+<a>
+
+<b>
+
+lw $a0 4($sp)
+lw $t0 8($sp)
+sne $a0 $a0 $t0
+addi $sp $sp 8
+sw $a0, 0($sp)
+addiu $sp, $sp, -4
+>>
+
+ltExpr(a, b) ::= <<
+<a>
+
+<b>
+
+lw $a0 4($sp)
+lw $t0 8($sp)
+slt $a0 $t0 $a0
+addi $sp $sp 8
+sw $a0, 0($sp)
+addiu $sp, $sp, -4
+>>
+
+gtExpr(a, b) ::= <<
+<a>
+
+<b>
+
+lw $a0 4($sp)
+lw $t0 8($sp)
+sgt $a0 $t0 $a0
+addi $sp $sp 8
+sw $a0, 0($sp)
+addiu $sp, $sp, -4
+>>
+
+addExpr(a, b) ::= <<
+<a>
+
+<b>
+
+lw $a0 4($sp)
+lw $t0 8($sp)
+add $a0 $t0 $a0
+addi $sp $sp 8
+sw $a0, 0($sp)
+addiu $sp, $sp, -4
+>>
+
+subExpr(a, b) ::= <<
+<a>
+
+<b>
+
+lw $a0 4($sp)
+lw $t0 8($sp)
+sub $a0 $t0 $a0
+addi $sp $sp 8
+sw $a0, 0($sp)
+addiu $sp, $sp, -4
+>>
+
+mulExpr(a, b) ::= <<
+<a>
+
+<b>
+
+lw $a0 4($sp)
+lw $t0 8($sp)
+mul $a0 $t0 $a0
+addi $sp $sp 8
+sw $a0, 0($sp)
+addiu $sp, $sp, -4
+>>
+
+divExpr(a, b) ::= <<
+<a>
+
+<b>
+
+lw $a0 4($sp)
+lw $t0 8($sp)
+div $a0 $t0 $a0
+addi $sp $sp 8
+sw $a0, 0($sp)
+addiu $sp, $sp, -4
+>>
+
+pushInt(num) ::= <<
+li $a0, <num>
+sw $a0, 0($sp)
+addiu $sp, $sp, -4
+>>
+
+pushVar(var) ::= <<
+lw $a0, <var>
+sw $a0, 0($sp)
+addiu $sp, $sp, -4
+>>
