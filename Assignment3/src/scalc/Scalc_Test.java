@@ -64,7 +64,7 @@ public class Scalc_Test {
 				}
 			}
 		} catch (RuntimeException e) {
-			System.out.println("A problem has occured with the scalc input file:");
+			System.out.println("A problem has occured with the scalc input file: " + e.getMessage());
 			System.out.println("Please check the input file for correctness.");
 			System.exit(1);
 			

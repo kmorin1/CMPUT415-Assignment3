@@ -20,6 +20,11 @@ public class Symbol {
 		return name;
 	}
 	
+	public String getTypeName()
+	{
+		return type.toString();
+	}
+	
 	public String toString()
 	{
 		if (type != null)

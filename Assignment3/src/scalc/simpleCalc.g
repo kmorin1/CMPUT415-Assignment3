@@ -12,6 +12,7 @@ tokens {
   STATEMENTS;
   ASSIGNMENT;
   DECLARATION;
+  GENERATOR;
 }
 
 @header
@@ -30,7 +31,14 @@ tokens {
   
   @Override
   protected Object recoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RuntimeException {
-    throw new RuntimeException("");
+    throw new RuntimeException("Mismatched Token");
+  }
+  
+  @Override
+  public void displayRecognitionError(String[] tokenNames, RecognitionException e) {
+    String hdr = getErrorHeader(e);
+    String msg = getErrorMessage(e, tokenNames);
+    throw new RuntimeException(hdr + ":" + msg);
   }
 }
 
@@ -67,14 +75,19 @@ statement
 
 type returns [Type tsym]
   : Int {$tsym = (Type)symtab.resolve("int");}
+  | Vector {$tsym = (Type)symtab.resolve("vector");}
   ;
   
 varDecl
   : type Identifier Assign expression
+  {
+    VariableSymbol vs = new VariableSymbol($Identifier.text, $type.tsym);
+    symtab.define(vs);
+    if (!$type.text.equals($expression.type))
     {
-     VariableSymbol vs = new VariableSymbol($Identifier.text, $type.tsym);
-     symtab.define(vs);
+      throw new RuntimeException("Incompatible types in var declaration");
     }
+  }
     -> ^(DECLARATION Identifier expression)
   ;
 
@@ -94,36 +107,79 @@ loopStatement
   : Loop LParen expression RParen subblock Pool -> ^(Loop expression subblock)
   ;
 
-expression
-  : equExpr
+expression returns [String type]
+  : equExpr {$type = $equExpr.type;}
   ;
   
-equExpr
-  : relExpr ((Equals | NEquals)^ relExpr)*
+equExpr returns [String type]
+@init {
+	$type = "int";
+}
+  : a=relExpr {if ($a.type == "vector") $type = "vector";}
+  ((Equals | NEquals)^ b=relExpr {if ($b.type == "vector") $type = "vector";})*
   ;
 
-relExpr
-  : addExpr ((LThan | GThan)^ addExpr)* 
+relExpr returns [String type]
+@init {
+	$type = "int";
+}
+  : a=addExpr {if ($a.type == "vector") $type = "vector";}
+  ((LThan | GThan)^ b=addExpr {if ($b.type == "vector") $type = "vector";})* 
   ;
   
-addExpr
-  : mulExpr ((Add | Subtract)^ mulExpr)*
+addExpr returns [String type]
+@init {
+	$type = "int";
+}
+  : a=mulExpr {if ($a.type == "vector") $type = "vector";}
+  ((Add | Subtract)^ b=mulExpr {if ($b.type == "vector") $type = "vector";})*
   ;
   
-mulExpr
-  : unaryExpr ((Multiply | Divide)^ unaryExpr)*
+mulExpr returns [String type]
+@init {
+	$type = "int";
+}
+  : a=unaryExpr {if ($a.type == "vector") $type = "vector";}
+  ((Multiply | Divide)^ b=unaryExpr {if ($b.type == "vector") $type = "vector";})*
   ;
   
-unaryExpr
-  : LParen expression RParen -> expression
-  | atom
+unaryExpr returns [String type]
+  : LParen expression RParen {$type = $expression.type;} -> expression 
+  | atom {$type = $atom.type;}
   ;
   
-atom
-  : Number
-  | Identifier {if (symtab.resolve($Identifier.text) == null)
-                  throw new RuntimeException("");}
+atom returns [String type]
+  : Number Range Number {$type = "vector";}
+  | Number {$type = "int";}
+  | Identifier 
+  {
+  	Symbol id = symtab.resolve($Identifier.text);
+  	if (id == null) {
+       throw new RuntimeException("Undefined variable " + $Identifier.text);
+    }
+    $type = id.getTypeName();          
+  }
+  | filter {$type = "vector";}
+  | generator {$type = "vector";}
   ;
+  
+filter
+	: Filter LParen Identifier 
+	{
+	   VariableSymbol vs = new VariableSymbol($Identifier.text, (Type)symtab.resolve("int"));
+     symtab.define(vs);
+  }
+     In vector=expression Bar condition=expression RParen -> ^(Filter Identifier $vector $condition)        
+  ;
+  
+generator
+	: LBracket Identifier 
+	{
+	  VariableSymbol vs = new VariableSymbol($Identifier.text, (Type)symtab.resolve("int"));
+	  symtab.define(vs);
+	}
+	  In vector=expression Bar apply=expression RBracket -> ^(GENERATOR Identifier $vector $apply)   
+	;
 
 If      : 'if';
 Fi      : 'fi';
@@ -131,6 +187,7 @@ Loop    : 'loop';
 Pool    : 'pool';
 Print   : 'print';
 Int     : 'int';
+Vector	: 'vector';
 Add     : '+';
 Subtract: '-';
 Multiply: '*';
@@ -141,8 +198,14 @@ GThan   : '>';
 LThan   : '<';
 LParen  : '(';
 RParen  : ')';
+LBracket: '[';
+RBracket: ']';
 Assign  : '=';
 SemiColon: ';';
+Range		: '..';
+Filter	: 'filter';
+In			: 'in';
+Bar			: '|';
 
 Number 
   : Digit+
