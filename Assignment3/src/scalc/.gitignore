@@ -1,3 +1,7 @@
 /Interpreter.tokens
 /Templater.tokens
 /simpleCalc.tokens
+/Templater.java
+/Interpreter.java
+/simpleCalcLexer.java
+/simpleCalcParser.java
