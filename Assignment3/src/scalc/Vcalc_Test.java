@@ -8,10 +8,11 @@ import org.antlr.runtime.ANTLRFileStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.TokenStream;
+import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.antlr.stringtemplate.StringTemplateGroup;
 		       
-public class Scalc_Test {
+public class Vcalc_Test {
 	public static void main(String[] args) throws RecognitionException {
 		if (args.length != 2) {
 			System.err.print("Insufficient arguments: ");
@@ -29,14 +30,21 @@ public class Scalc_Test {
 		}
 
 		try {
-			simpleCalcLexer lexer = new simpleCalcLexer(input);
+			ParserLexer lexer = new ParserLexer(input);
 			TokenStream tokenStream = new CommonTokenStream(lexer);
-			simpleCalcParser parser = new simpleCalcParser(tokenStream);
-			simpleCalcParser.program_return entry = parser.program();
-			Object ast = entry.getTree();
+			ParserParser parser = new ParserParser(tokenStream);
+			ParserParser.program_return entry = parser.program();
+			CommonTree ast = (CommonTree)entry.getTree();
+			
+			System.out.println("Passed Parser, AST:");
+			System.out.println(ast.toStringTree());
 
 			// Pass over to verify no variable misuse
 			CommonTreeNodeStream nodes = new CommonTreeNodeStream(ast);
+		        nodes.setTokenStream(tokenStream);
+		        Defined defined = new Defined(nodes);
+		        defined.program();
+		        System.out.println("Passed Defined");
 			
 			if (args[1].equals("int")) {
 				// Run it through the Interpreter

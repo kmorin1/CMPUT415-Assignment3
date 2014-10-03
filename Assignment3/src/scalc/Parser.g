@@ -1,4 +1,4 @@
-grammar simpleCalc;
+grammar Parser;
 
 options {
   language = Java;
@@ -9,6 +9,7 @@ options {
 tokens {
   MAINBLOCK;
   SUBBLOCK;
+  SUBEXPR;
   STATEMENTS;
   ASSIGNMENT;
   DECLARATION;
@@ -42,13 +43,6 @@ tokens {
   }
 }
 
-compilationUnit[SymbolTable symtab]
-
-@init
-{
-  this.symtab = symtab;
-} : varDecl*
-  ;
 
 program
   : mainblock EOF -> mainblock
@@ -80,15 +74,7 @@ type returns [Type tsym]
   
 varDecl
   : type Identifier Assign expression
-  {
-    VariableSymbol vs = new VariableSymbol($Identifier.text, $type.tsym);
-    symtab.define(vs);
-    if (!$type.text.equals($expression.type))
-    {
-      throw new RuntimeException("Incompatible types in var declaration");
-    }
-  }
-    -> ^(DECLARATION Identifier expression)
+    -> ^(DECLARATION type Identifier expression)
   ;
 
 assignment
@@ -107,78 +93,49 @@ loopStatement
   : Loop LParen expression RParen subblock Pool -> ^(Loop expression subblock)
   ;
 
-expression returns [String type]
-  : equExpr {$type = $equExpr.type;}
+expression
+  : equExpr
   ;
   
-equExpr returns [String type]
-@init {
-	$type = "int";
-}
-  : a=relExpr {if ($a.type == "vector") $type = "vector";}
-  ((Equals | NEquals)^ b=relExpr {if ($b.type == "vector") $type = "vector";})*
+equExpr
+  : a=relExpr
+  ((Equals | NEquals)^ b=relExpr)*
   ;
 
-relExpr returns [String type]
-@init {
-	$type = "int";
-}
-  : a=addExpr {if ($a.type == "vector") $type = "vector";}
-  ((LThan | GThan)^ b=addExpr {if ($b.type == "vector") $type = "vector";})* 
+relExpr
+  : a=addExpr
+  ((LThan | GThan)^ b=addExpr)* 
   ;
   
-addExpr returns [String type]
-@init {
-	$type = "int";
-}
-  : a=mulExpr {if ($a.type == "vector") $type = "vector";}
-  ((Add | Subtract)^ b=mulExpr {if ($b.type == "vector") $type = "vector";})*
+addExpr
+  : a=mulExpr
+  ((Add | Subtract)^ b=mulExpr)*
   ;
   
-mulExpr returns [String type]
-@init {
-	$type = "int";
-}
-  : a=unaryExpr {if ($a.type == "vector") $type = "vector";}
-  ((Multiply | Divide)^ b=unaryExpr {if ($b.type == "vector") $type = "vector";})*
+mulExpr
+  : a=unaryExpr
+  ((Multiply | Divide)^ b=unaryExpr)*
   ;
   
-unaryExpr returns [String type]
-  : LParen expression RParen {$type = $expression.type;} -> expression 
-  | atom {$type = $atom.type;}
+unaryExpr
+  : LParen expression RParen -> ^(SUBEXPR expression)
+  | atom
   ;
   
-atom returns [String type]
-  : Number Range Number {$type = "vector";}
-  | Number {$type = "int";}
+atom
+  : Number Range^ Number
+  | Number
   | Identifier 
-  {
-  	Symbol id = symtab.resolve($Identifier.text);
-  	if (id == null) {
-       throw new RuntimeException("Undefined variable " + $Identifier.text);
-    }
-    $type = id.getTypeName();          
-  }
-  | filter {$type = "vector";}
-  | generator {$type = "vector";}
+  | filter
+  | generator
   ;
   
 filter
-	: Filter LParen Identifier 
-	{
-	   VariableSymbol vs = new VariableSymbol($Identifier.text, (Type)symtab.resolve("int"));
-     symtab.define(vs);
-  }
-     In vector=expression Bar condition=expression RParen -> ^(Filter Identifier $vector $condition)        
+	: Filter LParen Identifier In vector=expression Bar condition=expression RParen -> ^(Filter Identifier $vector $condition)        
   ;
   
 generator
-	: LBracket Identifier 
-	{
-	  VariableSymbol vs = new VariableSymbol($Identifier.text, (Type)symtab.resolve("int"));
-	  symtab.define(vs);
-	}
-	  In vector=expression Bar apply=expression RBracket -> ^(GENERATOR Identifier $vector $apply)   
+	: LBracket Identifier In vector=expression Bar apply=expression RBracket -> ^(GENERATOR Identifier $vector $apply)   
 	;
 
 If      : 'if';

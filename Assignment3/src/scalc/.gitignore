@@ -5,3 +5,8 @@
 /Interpreter.java
 /simpleCalcLexer.java
 /simpleCalcParser.java
+/Defined.java
+/Defined.tokens
+/Parser.tokens
+/ParserLexer.java
+/ParserParser.java
