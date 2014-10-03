@@ -2,3 +2,6 @@
 /Templater.java
 /simpleCalcLexer.java
 /simpleCalcParser.java
+/ParserLexer.java
+/ParserParser.java
+/Defined.java

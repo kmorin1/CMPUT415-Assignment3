@@ -14,6 +14,7 @@ tokens {
   ASSIGNMENT;
   DECLARATION;
   GENERATOR;
+  INDEX;
 }
 
 @header
@@ -118,17 +119,23 @@ mulExpr
   ;
   
 unaryExpr
-  : LParen expression RParen -> ^(SUBEXPR expression)
+  : (LParen expression RParen index)=> LParen expression RParen index -> ^(SUBEXPR ^(INDEX expression index))
+  | LParen expression RParen -> ^(SUBEXPR expression)
+  | (atom index)=> atom index -> ^(INDEX atom index)
   | atom
   ;
   
 atom
   : Number Range^ Number
   | Number
-  | Identifier 
+  | Identifier
   | filter
   | generator
   ;
+  
+index
+	: LBracket expression RBracket -> expression
+	;
   
 filter
 	: Filter LParen Identifier In vector=expression Bar condition=expression RParen -> ^(Filter Identifier $vector $condition)        
