@@ -123,11 +123,35 @@ mulExpr returns [String type]
   
 unaryExpr returns [String type]
   : ^(SUBEXPR expression) {$type = $expression.type;}
+  | ^(INDEX ^(SUBEXPR vector=expression) index=expression)
+  {
+    if ($vector.type.equals("int"))
+    {
+      throw new RuntimeException("Cannot index an integer");
+    }
+    $type = $index.type;
+  }
   | atom {$type = $atom.type;}
+  | ^(INDEX atom index=expression)
+  {
+    
+    if ($atom.type.equals("int"))
+    {
+      throw new RuntimeException("Cannot index an integer");
+    }
+    $type = $index.type;
+  }
   ;
   
 atom returns [String type]
-  : ^(Range min=Number max=Number) {$type = "vector";}
+  : ^(Range min=Number max=Number)
+  {
+    if (Integer.parseInt($min.text) > Integer.parseInt($max.text))
+    {
+      throw new RuntimeException("Range must be non-decreasing");
+    }
+    $type = "vector";
+  }
   | Number {$type = "int";}
   | Identifier 
   {
@@ -135,7 +159,7 @@ atom returns [String type]
   	if (id == null) {
        throw new RuntimeException("Undefined variable " + $Identifier.text);
     }
-    $type = id.getTypeName();          
+    $type = id.getTypeName();        
   }
   | filter {$type = "vector";}
   | generator {$type = "vector";}

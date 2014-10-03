@@ -12,6 +12,7 @@ public class SymbolTable implements Scope {
 	protected void initTypeSystem()
 	{
 		define(new BuiltInTypeSymbol("int"));
+		define(new BuiltInTypeSymbol("vector"));
 	}
 	
 	public String getScopeName()

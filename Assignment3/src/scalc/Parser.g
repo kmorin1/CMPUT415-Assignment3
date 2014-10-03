@@ -119,7 +119,7 @@ mulExpr
   ;
   
 unaryExpr
-  : (LParen expression RParen index)=> LParen expression RParen index -> ^(SUBEXPR ^(INDEX expression index))
+  : (LParen expression RParen index)=> LParen expression RParen index -> ^(INDEX ^(SUBEXPR expression) index)
   | LParen expression RParen -> ^(SUBEXPR expression)
   | (atom index)=> atom index -> ^(INDEX atom index)
   | atom
