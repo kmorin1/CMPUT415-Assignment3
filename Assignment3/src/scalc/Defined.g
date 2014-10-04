@@ -117,42 +117,36 @@ mulExpr returns [String type]
 @init {
 	$type = "int";
 }
-  : ^((Multiply | Divide) a=unaryExpr b=unaryExpr) {if ($a.type == "vector" || $b.type == "vector") $type = "vector";}
-  | c=unaryExpr {$type = $c.type;}
+  : ^((Multiply | Divide) a=rangeExpr b=rangeExpr) {if ($a.type == "vector" || $b.type == "vector") $type = "vector";}
+  | c=rangeExpr {$type = $c.type;}
   ;
   
-unaryExpr returns [String type]
-  : ^(SUBEXPR expression) {$type = $expression.type;}
-  | ^(INDEX ^(SUBEXPR vector=expression) index=expression)
+rangeExpr returns [String type]
+  : ^(Range min=unaryExpr max=unaryExpr)
   {
-    if ($vector.type.equals("int"))
+    if ($min.type == "vector" || $max.type == "vector")
     {
-      throw new RuntimeException("Cannot index an integer");
-    }
-    $type = $index.type;
-  }
-  | atom {$type = $atom.type;}
-  | ^(INDEX atom index=expression)
-  {
-    
-    if ($atom.type.equals("int"))
-    {
-      throw new RuntimeException("Cannot index an integer");
-    }
-    $type = $index.type;
-  }
-  ;
-  
-atom returns [String type]
-  : ^(Range min=Number max=Number)
-  {
-    if (Integer.parseInt($min.text) > Integer.parseInt($max.text))
-    {
-      throw new RuntimeException("Range must be non-decreasing");
+      throw new RuntimeException("Cannot use a vector with range operator '..'");
     }
     $type = "vector";
   }
-  | Number {$type = "int";}
+  | a=unaryExpr {$type = $a.type;}
+  ;
+  
+unaryExpr returns [String type]
+  : ^(INDEX a=atom index=expression)
+  {
+    if ($a.type.equals("int"))
+    {
+      throw new RuntimeException("Can't index an integer value");
+    }
+    $type = $index.type;
+  }
+  | b=atom {$type = $b.type;}
+  ;
+  
+atom returns [String type]
+  : Number {$type = "int";}
   | Identifier 
   {
   	Symbol id = symtab.resolve($Identifier.text);
@@ -163,6 +157,7 @@ atom returns [String type]
   }
   | filter {$type = "vector";}
   | generator {$type = "vector";}
+  | ^(SUBEXPR expression) {$type = $expression.type;}
   ;
   
 filter

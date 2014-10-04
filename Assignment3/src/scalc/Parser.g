@@ -114,23 +114,26 @@ addExpr
   ;
   
 mulExpr
-  : a=unaryExpr
-  ((Multiply | Divide)^ b=unaryExpr)*
+  : a=rangeExpr
+  ((Multiply | Divide)^ b=rangeExpr)*
+  ;
+  
+rangeExpr
+  : (unaryExpr Range)=> unaryExpr Range^ unaryExpr
+  | unaryExpr
   ;
   
 unaryExpr
-  : (LParen expression RParen index)=> LParen expression RParen index -> ^(INDEX ^(SUBEXPR expression) index)
-  | LParen expression RParen -> ^(SUBEXPR expression)
-  | (atom index)=> atom index -> ^(INDEX atom index)
+  : (atom index)=> atom index -> ^(INDEX atom index)
   | atom
   ;
   
 atom
-  : Number Range^ Number
-  | Number
+  : Number
   | Identifier
   | filter
   | generator
+  | LParen expression RParen -> ^(SUBEXPR expression)
   ;
   
 index
