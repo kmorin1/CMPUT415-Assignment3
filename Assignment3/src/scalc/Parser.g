@@ -114,17 +114,17 @@ addExpr
   ;
   
 mulExpr
-  : a=rangeExpr
-  ((Multiply | Divide)^ b=rangeExpr)*
+  : a=indexExpr
+  ((Multiply | Divide)^ b=indexExpr)*
+  ;
+  
+indexExpr
+  : vector=rangeExpr
+  (i=index^)*
   ;
   
 rangeExpr
-  : (unaryExpr Range)=> unaryExpr Range^ unaryExpr
-  | unaryExpr
-  ;
-  
-unaryExpr
-  : (atom index)=> atom index -> ^(INDEX atom index)
+  : (atom Range)=> atom Range^ atom
   | atom
   ;
   
@@ -137,7 +137,7 @@ atom
   ;
   
 index
-	: LBracket expression RBracket -> expression
+	: LBracket i=expression RBracket -> ^(INDEX $i)
 	;
   
 filter
