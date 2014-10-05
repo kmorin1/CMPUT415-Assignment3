@@ -13,7 +13,14 @@ options {
 
 @members
 {
-  SymbolTable symtab = new SymbolTable();
+  SymbolTable symtab;
+  Scope currentScope;
+  
+  public Defined(TreeNodeStream input, SymbolTable symtab) {
+    this(input);
+    this.symtab = symtab;
+    currentScope = symtab.globals;
+  }
   
   @Override
   protected Object recoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RuntimeException {
@@ -52,8 +59,8 @@ statement
   ;
 
 type returns [Type tsym]
-  : Int {$tsym = (Type)symtab.resolve("int");}
-  | Vector {$tsym = (Type)symtab.resolve("vector");}
+  : Int {$tsym = (Type)symtab.globals.resolve("int");}
+  | Vector {$tsym = (Type)symtab.globals.resolve("vector");}
   ;
   
 varDecl
@@ -61,7 +68,7 @@ varDecl
   {
    
     VariableSymbol vs = new VariableSymbol($Identifier.text, $type.tsym);
-    symtab.define(vs);
+    currentScope.define(vs);
     if (!$type.text.equals($expression.type))
     {
       throw new RuntimeException("Incompatible types in var declaration");
@@ -71,6 +78,19 @@ varDecl
 
 assignment
   : ^(Assign Identifier expression)
+  {
+    Symbol id = currentScope.resolve($Identifier.text);
+    String idType = id.type.getName();
+    
+    if (id == null) {
+       throw new RuntimeException("Undefined variable " + $Identifier.text);
+    }
+       
+    if (!idType.equals($expression.type))
+    {
+      throw new RuntimeException("Incompatible types in var assignment");
+    }
+  }
   ;
 
 printStatement
@@ -149,11 +169,11 @@ atom returns [String type]
   : Number {$type = "int";}
   | Identifier 
   {
-  	Symbol id = symtab.resolve($Identifier.text);
+  	Symbol id = currentScope.resolve($Identifier.text);
   	if (id == null) {
        throw new RuntimeException("Undefined variable " + $Identifier.text);
     }
-    $type = id.getTypeName();        
+    $type = id.type.getName();        
   }
   | filter {$type = "vector";}
   | generator {$type = "vector";}
@@ -161,19 +181,31 @@ atom returns [String type]
   ;
   
 filter
+@init {
+  currentScope = new LocalScope(currentScope);
+}
+@after {
+  currentScope = currentScope.getEnclosingScope();
+}
 	: ^(Filter Identifier
 	{
-	   VariableSymbol vs = new VariableSymbol($Identifier.text, (Type)symtab.resolve("int"));
-     symtab.define(vs);
+	   VariableSymbol vs = new VariableSymbol($Identifier.text, (Type)currentScope.resolve("int"));
+     currentScope.define(vs);
   }
   vector=expression condition=expression)
   ;
   
 generator
+@init {
+  currentScope = new LocalScope(currentScope);
+}
+@after {
+  currentScope = currentScope.getEnclosingScope();
+}
 	: ^(GENERATOR Identifier  
 	{
-	  VariableSymbol vs = new VariableSymbol($Identifier.text, (Type)symtab.resolve("int"));
-	  symtab.define(vs);
+	  VariableSymbol vs = new VariableSymbol($Identifier.text, (Type)currentScope.resolve("int"));
+	  currentScope.define(vs);
 	}
 	vector=expression apply=expression) 
 	;

@@ -29,8 +29,6 @@ tokens {
 
 @members
 {
-  SymbolTable symtab = new SymbolTable();
-  
   @Override
   protected Object recoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RuntimeException {
     throw new RuntimeException("Mismatched Token");
@@ -68,14 +66,13 @@ statement
   | loopStatement SemiColon -> loopStatement
   ;
 
-type returns [Type tsym]
-  : Int {$tsym = (Type)symtab.resolve("int");}
-  | Vector {$tsym = (Type)symtab.resolve("vector");}
+type
+  : Int
+  | Vector
   ;
   
 varDecl
-  : type Identifier Assign expression
-    -> ^(DECLARATION type Identifier expression)
+  : type Identifier Assign expression -> ^(DECLARATION type Identifier expression)
   ;
 
 assignment
@@ -99,28 +96,23 @@ expression
   ;
   
 equExpr
-  : a=relExpr
-  ((Equals | NEquals)^ b=relExpr)*
+  : relExpr ((Equals | NEquals)^ relExpr)*
   ;
 
 relExpr
-  : a=addExpr
-  ((LThan | GThan)^ b=addExpr)* 
+  : addExpr ((LThan | GThan)^ addExpr)* 
   ;
   
 addExpr
-  : a=mulExpr
-  ((Add | Subtract)^ b=mulExpr)*
+  : mulExpr ((Add | Subtract)^ mulExpr)*
   ;
   
 mulExpr
-  : a=indexExpr
-  ((Multiply | Divide)^ b=indexExpr)*
+  : indexExpr ((Multiply | Divide)^ indexExpr)*
   ;
   
 indexExpr
-  : vector=rangeExpr
-  (i=index^)*
+  : rangeExpr (index^)*
   ;
   
 rangeExpr
@@ -137,7 +129,7 @@ atom
   ;
   
 index
-	: LBracket i=expression RBracket -> ^(INDEX $i)
+	: LBracket expression RBracket -> ^(INDEX expression)
 	;
   
 filter

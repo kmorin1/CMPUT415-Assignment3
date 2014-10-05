@@ -39,12 +39,14 @@ public class Vcalc_Test {
 			System.out.println("Passed Parser, AST:");
 			System.out.println(ast.toStringTree());
 
+			SymbolTable symtab = new SymbolTable();
+			
 			// Pass over to verify no variable misuse
 			CommonTreeNodeStream nodes = new CommonTreeNodeStream(ast);
-		        nodes.setTokenStream(tokenStream);
-		        Defined defined = new Defined(nodes);
-		        defined.program();
-		        System.out.println("Passed Defined");
+		    nodes.setTokenStream(tokenStream);
+		    Defined defined = new Defined(nodes, symtab);
+		    defined.program();
+		    System.out.println("Passed Defined");
 			
 			if (args[1].equals("int")) {
 				// Run it through the Interpreter
