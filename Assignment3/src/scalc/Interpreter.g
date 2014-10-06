@@ -16,6 +16,7 @@ options {
   SymbolTable symtab;
   Scope currentScope;
   Helper helper = new Helper();
+  boolean conditional = true;
   
   public Interpreter(TreeNodeStream input, SymbolTable symtab) {
     this(input);
@@ -75,21 +76,38 @@ varDecl
 assignment
   : ^(Assign Identifier expression)
   {
-    VariableSymbol vs = (VariableSymbol)currentScope.resolve($Identifier.text);
-    vs.value = $expression.value;
+    if (conditional) {
+      VariableSymbol vs = (VariableSymbol)currentScope.resolve($Identifier.text);
+      vs.value = $expression.value;
+    }
   }
   ;
 
 printStatement
-  : ^(Print expression) {System.out.println($expression.value);}
+  : ^(Print expression)
+  {
+    if (conditional) {
+      System.out.println($expression.value);
+    }
+  }
   ;
 
 ifStatement
-  : ^(If expression subblock)
+@init {
+  boolean localconditional = conditional;
+}
+  : ^(If expression {if (helper.equalsZero($expression.value)) {conditional = false;}} subblock) 
+     {conditional = localconditional;} 
   ;
-
+  
 loopStatement
-  : ^(Loop expression subblock)
+@init {
+  boolean localconditional = conditional;
+  int localmarker = input.mark();
+}
+  : ^(Loop expression {if (helper.equalsZero($expression.value)) {conditional = false;}} subblock) 
+     {if (conditional) input.rewind(localmarker);} 
+     {conditional = localconditional;}
   ;
 
 expression returns [ReturnValue value]

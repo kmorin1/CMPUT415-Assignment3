@@ -9,6 +9,15 @@ public class Helper {
 		
 	}
 	
+	public boolean equalsZero(ReturnValue value) {
+		ReturnInt intValue = value instanceof ReturnInt ? (ReturnInt)value : null;
+		if (intValue == null) {
+			throw new RuntimeException("Expression in conditional must return an integer");
+		}
+		boolean result = intValue.value == 0;
+		return result;
+	}
+	
 	public ReturnVector range(ReturnValue minValue, ReturnValue maxValue) {
 		ReturnInt min = minValue instanceof ReturnInt ? (ReturnInt)minValue : null;
 		ReturnInt max = maxValue instanceof ReturnInt ? (ReturnInt)maxValue : null;
@@ -302,6 +311,10 @@ public class Helper {
 		ReturnVector vecta = a instanceof ReturnVector ? (ReturnVector)a : null;
 		ReturnVector vectb = b instanceof ReturnVector ? (ReturnVector)b : null;
 		if (inta != null && intb != null) {
+			if (intb.value == 0) {
+				throw new RuntimeException("Trying to divide by 0!");
+			}
+			
 			int result = inta.value / intb.value;
 			return new ReturnInt(result);
 		}
