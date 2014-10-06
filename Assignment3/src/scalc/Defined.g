@@ -66,7 +66,11 @@ type returns [Type tsym]
 varDecl
   : ^(DECLARATION type Identifier expression)
   {
-   
+    Symbol id = currentScope.resolve($Identifier.text);
+    if (id != null) {
+       throw new RuntimeException("Variable " + $Identifier.text + " defined more than once");
+    }
+    
     VariableSymbol vs = new VariableSymbol($Identifier.text, $type.tsym);
     currentScope.define(vs);
     if (!$type.text.equals($expression.type))
@@ -80,12 +84,11 @@ assignment
   : ^(Assign Identifier expression)
   {
     Symbol id = currentScope.resolve($Identifier.text);
-    String idType = id.type.getName();
-    
     if (id == null) {
        throw new RuntimeException("Undefined variable " + $Identifier.text);
     }
-       
+    
+    String idType = id.type.getName();
     if (!idType.equals($expression.type))
     {
       throw new RuntimeException("Incompatible types in var assignment");
