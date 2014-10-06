@@ -59,8 +59,8 @@ statement
   ;
 
 type returns [Type tsym]
-  : Int {$tsym = (Type)symtab.globals.resolve("int");}
-  | Vector {$tsym = (Type)symtab.globals.resolve("vector");}
+  : Int {$tsym = (Type)currentScope.resolve("int");}
+  | Vector {$tsym = (Type)currentScope.resolve("vector");}
   ;
   
 varDecl
