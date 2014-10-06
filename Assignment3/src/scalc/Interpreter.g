@@ -94,14 +94,14 @@ loopStatement
 
 expression returns [ReturnValue value]
   : ^(Equals a=expression b=expression) {$value = helper.equals($a.value, $b.value);}
-  | ^(NEquals a=expression b=expression)
-  | ^(LThan a=expression b=expression)
-  | ^(GThan a=expression b=expression)
-  | ^(Add a=expression b=expression)
-  | ^(Subtract a=expression b=expression)
-  | ^(Multiply a=expression b=expression)
-  | ^(Divide a=expression b=expression)
-  | ^(INDEX index=expression vector=expression)
+  | ^(NEquals a=expression b=expression) {$value = helper.nEquals($a.value, $b.value);}
+  | ^(LThan a=expression b=expression) {$value = helper.lessThan($a.value, $b.value);}
+  | ^(GThan a=expression b=expression) {$value = helper.greaterThan($a.value, $b.value);}
+  | ^(Add a=expression b=expression) {$value = helper.add($a.value, $b.value);}
+  | ^(Subtract a=expression b=expression) {$value = helper.subtract($a.value, $b.value);}
+  | ^(Multiply a=expression b=expression) {$value = helper.multiply($a.value, $b.value);}
+  | ^(Divide a=expression b=expression) {$value = helper.divide($a.value, $b.value);}
+  | ^(INDEX index=expression vector=expression) {$value = helper.index($vector.value, $index.value);}
   | ^(Range min=atom max=atom) {$value = helper.range($min.value, $max.value);}
   | a=atom {$value = $a.value;}
   ;
