@@ -51,7 +51,7 @@ public class Vcalc_Test {
 			if (args[1].equals("int")) {
 				// Run it through the Interpreter
 				nodes.reset();
-				Interpreter interpreter = new Interpreter(nodes);
+				Interpreter interpreter = new Interpreter(nodes, symtab);
 				interpreter.program();
 			} else {
 				// Pass it all to the String templater!
