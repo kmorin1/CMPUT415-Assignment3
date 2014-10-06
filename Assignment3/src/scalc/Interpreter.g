@@ -139,33 +139,124 @@ atom returns [ReturnValue value]
 filter returns [ReturnValue value]
 @init {
   currentScope = new LocalScope(currentScope);
+  VariableSymbol vs = null;
+  ArrayList<Integer> result = new ArrayList<Integer>(5);
+  int domainSize = 0;
+  int localMarker = input.mark();
+  int index = 0;
 }
 @after {
   currentScope = currentScope.getEnclosingScope();
 }
 	: ^(Filter Identifier
 	{
-	   VariableSymbol vs = new VariableSymbol($Identifier.text, (Type)currentScope.resolve("int"));
+	   vs = new VariableSymbol($Identifier.text, (Type)currentScope.resolve("int"));
      currentScope.define(vs);
   }
-  vector=expression condition=expression)
+  vector=expression
+  {
+    if ($vector.value instanceof ReturnInt)
+    {
+      throw new RuntimeException("Filter domain must be a vector");
+    }
+    
+    ReturnVector domain = (ReturnVector)$vector.value;
+    domainSize = domain.size();
+    result = new ArrayList<Integer>(domain.size());
+    localMarker = input.mark();
+    if (index < domainSize)
+    {
+      vs.value = new ReturnInt(domain.value.get(index));
+      index++;
+    }
+  }
+  condition=expression
+  {
+    if ($condition.value instanceof ReturnVector)
+    {
+      throw new RuntimeException("Filter condition must be an integer");
+    }
+    
+    if (!helper.equalsZero($condition.value)) {
+      int toAdd = ((ReturnInt)vs.value).value;
+      result.add(toAdd);
+    }
+    
+    while (index < domainSize)
+    {
+      vs.value = new ReturnInt(domain.value.get(index));
+      index++;
+      input.LT(1);
+      input.rewind(localMarker);
+      ReturnInt returned = (ReturnInt)expression();
+      if (!helper.equalsZero(returned)) {
+        int toAdd = ((ReturnInt)vs.value).value;
+        result.add(toAdd);
+      }
+    }
+  }
+  )
+  {
+    $value = new ReturnVector(result);
+  }
   ;
   
 generator returns [ReturnValue value]
 @init {
   currentScope = new LocalScope(currentScope);
   VariableSymbol vs = null;
-}
+  ArrayList<Integer> result = new ArrayList<Integer>(5);
+  int domainSize = 0;
+  int localMarker = input.mark();
+  int index = 0;
+} 
 @after {
   currentScope = currentScope.getEnclosingScope();
 }
-	: ^(GENERATOR Identifier  
+	: ^(GENERATOR Identifier 
 	{
 	  vs = new VariableSymbol($Identifier.text, (Type)currentScope.resolve("int"));
 	  currentScope.define(vs);
 	}
-	vector=expression apply=expression)
+	vector=expression
 	{
+	  if ($vector.value instanceof ReturnInt)
+	  {
+	    throw new RuntimeException("Generator domain must be a vector");
+	  }
 	  
-	} 
+	  ReturnVector domain = (ReturnVector)$vector.value;
+	  domainSize = domain.size();
+	  result = new ArrayList<Integer>(domain.size());
+	  localMarker = input.mark();
+	  if (index < domainSize)
+	  {
+	    vs.value = new ReturnInt(domain.value.get(index));
+	    index++;
+	  }
+	}
+	apply=expression
+	{
+	  if ($apply.value instanceof ReturnVector)
+	  {
+	    throw new RuntimeException("Generator must generate integers");
+	  }
+	  
+	  ReturnInt toAdd = (ReturnInt)$apply.value;
+	  result.add(toAdd.value);
+	  
+	  while (index < domainSize)
+	  {
+	    vs.value = new ReturnInt(domain.value.get(index));
+	    index++;
+	    input.LT(1);
+	    input.rewind(localMarker);
+	    ReturnInt returned = (ReturnInt)expression();
+	    result.add(returned.value);
+	  }
+	}
+	)
+	{
+	  $value = new ReturnVector(result);
+	}
 	;
