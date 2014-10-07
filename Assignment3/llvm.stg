@@ -153,3 +153,18 @@ br label %.skip<name>
 ;end conditional
 
 >>
+
+loop(condition, body, name) ::= <<
+;start conditional
+br label %.startloop<name>
+.startloop<name>:
+<condition>
+%.notZero<name> = icmp ne i32 %.<name>, 0
+br i1 %.notZero<name>, label %.body<name>, label %.endloop<name>
+.body<name>:
+<body>
+br label %.startloop<name>
+.endloop<name>:
+;end conditional
+
+>>

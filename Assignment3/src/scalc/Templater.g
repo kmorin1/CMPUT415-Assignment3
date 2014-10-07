@@ -59,7 +59,7 @@ statement
   : assignment -> return(a={$assignment.st})
   | printStatement -> return(a={$printStatement.st})
   | ifStatement -> return(a={$ifStatement.st})
-  | loopStatement
+  | loopStatement -> return(a={$loopStatement.st})
   ;
 
 type returns [Type tsym]
@@ -95,7 +95,7 @@ ifStatement
   ;
   
 loopStatement
-  : ^(Loop expression subblock) 
+  : ^(Loop expression subblock) -> loop(condition={$expression.st}, body={$subblock.st}, name={$expression.name})
   ;
 
 expression returns [String name]
