@@ -36,6 +36,7 @@ outputAssi(var, expr, name, temp) ::= <<
 
 store i32 %.<name>, i32* @.<var>
 ;end outputAssi
+
 >>
 
 load_num(name, value) ::= <<
@@ -44,6 +45,7 @@ load_num(name, value) ::= <<
 store i32 <value>, i32* %.temp<name>
 %.<name> = load i32* %.temp<name>
 ;end load_num
+
 >>
 
 load_var(name, var) ::= <<
@@ -59,23 +61,52 @@ print(expr, result) ::= <<
 
 call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str, i32 0, i32 0), i32 %.<result>)
 ;end print
+
 >>
 
 equals(expr1, expr2, name1, name2, result) ::= <<
-;load into <name1>
+;start equals
 <expr1>
-;load into <name2>
 <expr2>
 
-%.<result> = icmp eq  i32 %.<name1>, i32 %.<name2>
+%.temp<result> = icmp eq  i32 %.<name1>, %.<name2>
+%.<result> = i32 %.temp<result>
+;end equals
 >>
 
 
 add(expr1, expr2, name1, name2, result) ::= <<
-;load into <name1>
+;start add
 <expr1>
-;load into <name2>
 <expr2>
 %.<result> = add i32 %.<name1>, %.<name2>
+;end add
+
+>>
+
+sub(expr1, expr2, name1, name2, result) ::= <<
+;start add
+<expr1>
+<expr2>
+%.<result> = sub i32 %.<name1>, %.<name2>
+;end add
+
+>>
+
+mul(expr1, expr2, name1, name2, result) ::= <<
+;start add
+<expr1>
+<expr2>
+%.<result> = mul i32 %.<name1>, %.<name2>
+;end add
+
+>>
+
+div(expr1, expr2, name1, name2, result) ::= <<
+;start add
+<expr1>
+<expr2>
+%.<result> = udiv i32 %.<name1>, %.<name2>
+;end add
 
 >>

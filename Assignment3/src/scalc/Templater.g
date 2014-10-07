@@ -77,7 +77,7 @@ varDecl
   ;
 
 assignment
-  : ^(Assign Identifier expression) -> return(a={$expression.st})
+  : ^(Assign Identifier expression) -> outputAssi(var={$Identifier.text}, expr={$expression.st}, name={$expression.name})
   ;
 
 printStatement
@@ -107,9 +107,9 @@ expression returns [String name]
   | ^(LThan x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
   | ^(GThan x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter}) 
   | ^(Add x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
-  | ^(Subtract x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
-  | ^(Multiply x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
-  | ^(Divide x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  | ^(Subtract x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> sub(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  | ^(Multiply x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> mul(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  | ^(Divide x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> div(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
   | ^(INDEX index=expression {counter++;}vector=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
   | ^(Range x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
   | a=atom {$name = $a.name; counter++;}-> return(a={$a.st})
