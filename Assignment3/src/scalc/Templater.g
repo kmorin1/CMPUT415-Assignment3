@@ -103,9 +103,9 @@ expression returns [String name]
 	//counter++;
 }
   : ^(Equals x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> equals(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
-  | ^(NEquals x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
-  | ^(LThan x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
-  | ^(GThan x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter}) 
+  | ^(NEquals x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> nEquals(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  | ^(LThan x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> lessThan(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  | ^(GThan x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> greaterThan(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter}) 
   | ^(Add x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
   | ^(Subtract x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> sub(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
   | ^(Multiply x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> mul(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})

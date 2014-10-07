@@ -69,9 +69,39 @@ equals(expr1, expr2, name1, name2, result) ::= <<
 <expr1>
 <expr2>
 
-%.temp<result> = icmp eq  i32 %.<name1>, %.<name2>
-%.<result> = i32 %.temp<result>
+%.bool<result> = icmp eq  i32 %.<name1>, %.<name2>
+%.<result> = select i1 %.bool<result>, i32 1, i32 0
 ;end equals
+>>
+
+nEquals(expr1, expr2, name1, name2, result) ::= <<
+;start nequals
+<expr1>
+<expr2>
+
+%.bool<result> = icmp ne  i32 %.<name1>, %.<name2>
+%.<result> = select i1 %.bool<result>, i32 1, i32 0
+;end nequals
+>>
+
+lessThan(expr1, expr2, name1, name2, result) ::= <<
+;start less than
+<expr1>
+<expr2>
+
+%.bool<result> = icmp slt  i32 %.<name1>, %.<name2>
+%.<result> = select i1 %.bool<result>, i32 1, i32 0
+;end less than
+>>
+
+greaterThan(expr1, expr2, name1, name2, result) ::= <<
+;start greater than
+<expr1>
+<expr2>
+
+%.bool<result> = icmp sgt  i32 %.<name1>, %.<name2>
+%.<result> = select i1 %.bool<result>, i32 1, i32 0
+;end greater than
 >>
 
 
