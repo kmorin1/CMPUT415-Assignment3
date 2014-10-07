@@ -58,7 +58,7 @@ declaration
 statement
   : assignment -> return(a={$assignment.st})
   | printStatement -> return(a={$printStatement.st})
-  | ifStatement
+  | ifStatement -> return(a={$ifStatement.st})
   | loopStatement
   ;
 
@@ -91,7 +91,7 @@ ifStatement
 @init {
   boolean localconditional = conditional;
 }
-  : ^(If expression subblock) 
+  : ^(If expression subblock) -> conditional(condition={$expression.st}, body={$subblock.st}, name={$expression.name})
   ;
   
 loopStatement

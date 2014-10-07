@@ -140,3 +140,16 @@ div(expr1, expr2, name1, name2, result) ::= <<
 ;end add
 
 >>
+
+conditional(condition, body, name) ::= <<
+;start conditional
+<condition>
+%.notZero<name> = icmp ne i32 %.<name>, 0
+br i1 %.notZero<name>, label %.body<name>, label %.skip<name>
+.body<name>:
+<body>
+br label %.skip<name>
+.skip<name>:
+;end conditional
+
+>>
