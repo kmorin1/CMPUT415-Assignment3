@@ -18,6 +18,7 @@ options {
   Scope currentScope;
   boolean conditional = true;
   int counter = 0;
+  List<String> variables = new ArrayList<String>();
   
   public Templater(TreeNodeStream input, SymbolTable symtab) {
     this(input);
@@ -43,7 +44,7 @@ program
   ;
   
 mainblock
-  : ^(MAINBLOCK (d+=declaration)* (s+=statement)*) -> llvmProgram(declarations={$d}, statements={$s})
+  : ^(MAINBLOCK (d+=declaration)* (s+=statement)*) -> llvmProgram(declarations={variables}, assignments={$d}, statements={$s})
   ;
 
 subblock
@@ -56,7 +57,7 @@ declaration
 
 statement
   : assignment -> return(a={$assignment.st})
-  | printStatement
+  | printStatement -> return(a={$printStatement.st})
   | ifStatement
   | loopStatement
   ;
@@ -69,9 +70,10 @@ type returns [Type tsym]
 varDecl
   : ^(DECLARATION type Identifier expression)
   {
+  	variables.add($Identifier.text);
     VariableSymbol vs = (VariableSymbol)currentScope.resolve($Identifier.text);
   }
-  -> declare(var={$Identifier.text}, expr={$expression.st}, name={$expression.name})
+  -> outputAssi(var={$Identifier.text}, expr={$expression.st}, name={$expression.name})
   ;
 
 assignment
@@ -82,6 +84,7 @@ printStatement
   : ^(Print expression)
   {
   }
+  -> print(expr={$expression.st}, result={$expression.name})
   ;
 
 ifStatement
@@ -102,7 +105,7 @@ expression returns [String name]
   : ^(Equals expression expression)
   | ^(NEquals expression expression)
   | ^(LThan expression expression)
-  | ^(GThan expression expression)
+  | ^(GThan expression expression) 
   | ^(Add x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
   | ^(Subtract expression expression)
   | ^(Multiply expression expression)
