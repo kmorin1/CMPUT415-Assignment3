@@ -11,68 +11,154 @@ options {
 {
   package scalc;
 }
-@members {
-  List<String> variables = new ArrayList<String>();
-  int branchCounter = 0;
+
+@members
+{
+  SymbolTable symtab;
+  Scope currentScope;
+  boolean conditional = true;
+  
+  public Templater(TreeNodeStream input, SymbolTable symtab) {
+    this(input);
+    this.symtab = symtab;
+    currentScope = symtab.globals;
+  }
+  
+  @Override
+  protected Object recoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RuntimeException {
+    throw new RuntimeException("Mismatched Token");
+  }
+  
+  @Override
+  public void displayRecognitionError(String[] tokenNames, RecognitionException e) {
+    String hdr = getErrorHeader(e);
+    String msg = getErrorMessage(e, tokenNames);
+    throw new RuntimeException(hdr + ":" + msg);
+  }
 }
 
 program
-  : a+=mainblock -> compose(final={$a})
+  : mainblock
   ;
   
 mainblock
-  : ^(MAINBLOCK (a+=varDecl)* (b+=statement)*) 
-    -> assemblyOut(vars={variables}, assi={$a}, state={$b})
+  : ^(MAINBLOCK declaration* statement*)
   ;
 
 subblock
-  : ^(SUBBLOCK (a+=statement)*) -> compose(final={$a})
+  : ^(SUBBLOCK statement*)
   ;
 
-varDecl
-  : ^(DECLARATION a=Identifier b=expression) 
-    {variables.add($a.text);}
-    -> outputAssi(var={$a.text}, value={$b.st})
+declaration
+  : varDecl
+  ;
+
+statement
+  : assignment
+  | printStatement
+  | ifStatement
+  | loopStatement
+  ;
+
+type returns [Type tsym]
+  : Int {$tsym = (Type)symtab.globals.resolve("int");}
+  | Vector {$tsym = (Type)symtab.globals.resolve("vector");}
   ;
   
-statement
-  : a+=assignment -> compose(final={$a})
-  | a+=printStatement ->compose(final={$a})
-  | a+=ifStatement -> compose(final={$a})
-  | a+=loopStatement -> compose(final={$a})
-  ; 
+varDecl
+  : ^(DECLARATION type Identifier expression)
+  {
+    VariableSymbol vs = (VariableSymbol)currentScope.resolve($Identifier.text);
+  }
+  ;
 
 assignment
-  : ^(Assign a=Identifier b=expression) -> outputAssi(var={$a.text}, value={$b.st})
+  : ^(Assign Identifier expression)
+  {
+  }
   ;
-  
+
 printStatement
-  : ^(Print a+=expression) -> outputPrint(value={$a})
+  : ^(Print expression)
+  {
+  }
   ;
-  
+
 ifStatement
-  : ^(If a=expression b=subblock) {branchCounter++;}
-    -> outputIf(a={$a.st}, b={$b.st}, c={branchCounter})
+@init {
+  boolean localconditional = conditional;
+}
+  : ^(If expression subblock) 
   ;
   
 loopStatement
-  : ^(Loop a=expression b=subblock) {branchCounter+=2;}
-  -> outputWhile(a={$a.st}, b={$b.st}, c={branchCounter},d={branchCounter-1})
+@init {
+  boolean localconditional = conditional;
+  int localmarker = input.mark();
+}
+  : ^(Loop expression subblock) 
   ;
-  
+
 expression
-  : ^(Equals a=expression b=expression)  -> eExpr(a={$a.st}, b={$b.st})
-  | ^(NEquals a=expression b=expression) -> neExpr(a={$a.st}, b={$b.st})
-  | ^(LThan a=expression b=expression) -> ltExpr(a={$a.st}, b={$b.st})
-  | ^(GThan a=expression b=expression) -> gtExpr(a={$a.st}, b={$b.st})
-  | ^(Add a=expression b=expression) -> addExpr(a={$a.st}, b={$b.st})
-  | ^(Subtract a=expression b=expression) -> subExpr(a={$a.st}, b={$b.st})
-  | ^(Multiply a=expression b=expression) -> mulExpr(a={$a.st}, b={$b.st})
-  | ^(Divide a=expression b=expression) -> divExpr(a={$a.st}, b={$b.st})
-  | c=atom -> compose(final={$c.st})
+  : ^(Equals expression expression)
+  | ^(NEquals expression expression)
+  | ^(LThan expression expression)
+  | ^(GThan expression expression)
+  | ^(Add expression expression)
+  | ^(Subtract expression expression)
+  | ^(Multiply expression expression)
+  | ^(Divide expression expression)
+  | ^(INDEX index=expression vector=expression)
+  | ^(Range min=atom max=atom)
+  | a=atom
   ;
   
 atom
-  : Number -> pushInt(num={$Number.text})
-  | Identifier -> pushVar(var={$Identifier.text})
+  : Number
+  | Identifier
+  {
+    VariableSymbol vs = (VariableSymbol)currentScope.resolve($Identifier.text);
+  }
+  | filter
+  | generator
+  | ^(SUBEXPR expression)
   ;
+  
+filter
+@init {
+  currentScope = new LocalScope(currentScope);
+}
+@after {
+  currentScope = currentScope.getEnclosingScope();
+}
+	: ^(Filter Identifier
+	{
+	   VariableSymbol vs = new VariableSymbol($Identifier.text, (Type)currentScope.resolve("int"));
+     currentScope.define(vs);
+  }
+  vector=expression
+
+  condition=expression
+
+  )
+  ;
+  
+generator
+@init {
+  currentScope = new LocalScope(currentScope);
+} 
+@after {
+  currentScope = currentScope.getEnclosingScope();
+}
+	: ^(GENERATOR Identifier 
+	{
+	  VariableSymbol vs = new VariableSymbol($Identifier.text, (Type)currentScope.resolve("int"));
+	  currentScope.define(vs);
+	}
+	vector=expression
+
+	apply=expression
+	
+	)
+
+	;
