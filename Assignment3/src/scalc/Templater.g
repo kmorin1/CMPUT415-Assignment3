@@ -17,6 +17,7 @@ options {
   SymbolTable symtab;
   Scope currentScope;
   boolean conditional = true;
+  int counter = 0;
   
   public Templater(TreeNodeStream input, SymbolTable symtab) {
     this(input);
@@ -38,31 +39,31 @@ options {
 }
 
 program
-  : mainblock
+  : mainblock -> return(a={$mainblock.st})
   ;
   
 mainblock
-  : ^(MAINBLOCK declaration* statement*)
+  : ^(MAINBLOCK (d+=declaration)* (s+=statement)*) -> llvmProgram(declarations={$d}, statements={$s})
   ;
 
 subblock
-  : ^(SUBBLOCK statement*)
+  : ^(SUBBLOCK (s+=statement)*) -> return(a={$s})
   ;
 
 declaration
-  : varDecl
+  : varDecl -> return(a={$varDecl.st})
   ;
 
 statement
-  : assignment
+  : assignment -> return(a={$assignment.st})
   | printStatement
   | ifStatement
   | loopStatement
   ;
 
 type returns [Type tsym]
-  : Int {$tsym = (Type)symtab.globals.resolve("int");}
-  | Vector {$tsym = (Type)symtab.globals.resolve("vector");}
+  : Int {$tsym = (Type)currentScope.resolve("int");}
+  | Vector {$tsym = (Type)currentScope.resolve("vector");}
   ;
   
 varDecl
@@ -70,12 +71,11 @@ varDecl
   {
     VariableSymbol vs = (VariableSymbol)currentScope.resolve($Identifier.text);
   }
+  -> declare(var={$Identifier.text}, expr={$expression.st}, name={$expression.name})
   ;
 
 assignment
-  : ^(Assign Identifier expression)
-  {
-  }
+  : ^(Assign Identifier expression) -> return(a={$expression.st})
   ;
 
 printStatement
@@ -92,36 +92,38 @@ ifStatement
   ;
   
 loopStatement
-@init {
-  boolean localconditional = conditional;
-  int localmarker = input.mark();
-}
   : ^(Loop expression subblock) 
   ;
 
-expression
+expression returns [String name]
+@after {
+	//counter++;
+}
   : ^(Equals expression expression)
   | ^(NEquals expression expression)
   | ^(LThan expression expression)
   | ^(GThan expression expression)
-  | ^(Add expression expression)
+  | ^(Add x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
   | ^(Subtract expression expression)
   | ^(Multiply expression expression)
   | ^(Divide expression expression)
   | ^(INDEX index=expression vector=expression)
   | ^(Range min=atom max=atom)
-  | a=atom
+  | a=atom {$name = $a.name;}-> return(a={$a.st})
   ;
   
-atom
-  : Number
-  | Identifier
+atom returns [String name]
+@after {
+	//$name = counter;
+}
+  : Number {$name = Integer.toString(counter);} -> load(name={counter}, value={$Number.text})
+  | Identifier {$name = $Identifier.text;}
   {
     VariableSymbol vs = (VariableSymbol)currentScope.resolve($Identifier.text);
   }
   | filter
   | generator
-  | ^(SUBEXPR expression)
+  | ^(SUBEXPR expression) {$name = $expression.name;} -> return(a={$expression.st})
   ;
   
 filter

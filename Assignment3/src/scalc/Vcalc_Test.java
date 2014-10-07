@@ -65,7 +65,7 @@ public class Vcalc_Test {
 
 					nodes.reset();
 
-					Templater templater = new Templater(nodes);
+					Templater templater = new Templater(nodes, symtab);
 					templater.setTemplateLib(stg);
 					System.out.println(templater.program().getTemplate().toString());				
 				} catch (FileNotFoundException e) {
