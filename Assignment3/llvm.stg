@@ -24,27 +24,52 @@ define i32 @main(i32 %argc, i8** %argv) nounwind uwtable {
 <assignments:{ b | <b>}>
 <statements>
 
+ret i32 0
 }
 
 declare i32 @printf(i8*, ...)
 >>
 
-outputAssi(var, expr, name) ::= <<
+outputAssi(var, expr, name, temp) ::= <<
+;start outputAssi
 <expr>
-store i32, %.<name>, i32* %.<var>
 
+store i32 %.<name>, i32* @.<var>
+;end outputAssi
 >>
 
-load(name, value) ::= <<
-%.<name> = alloca i32, align 4
-store i32 <value>, i32* %.<name>
+load_num(name, value) ::= <<
+;start load_num
+%.temp<name> = alloca i32, align 4
+store i32 <value>, i32* %.temp<name>
+%.<name> = load i32* %.temp<name>
+;end load_num
+>>
+
+load_var(name, var) ::= <<
+;start load_var
+%.<name> = load i32* @.<var>
+;end load_var
 
 >>
 
 print(expr, result) ::= <<
+;start print
 <expr>
+
 call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str, i32 0, i32 0), i32 %.<result>)
+;end print
 >>
+
+equals(expr1, expr2, name1, name2, result) ::= <<
+;load into <name1>
+<expr1>
+;load into <name2>
+<expr2>
+
+%.<result> = icmp eq  i32 %.<name1>, i32 %.<name2>
+>>
+
 
 add(expr1, expr2, name1, name2, result) ::= <<
 ;load into <name1>

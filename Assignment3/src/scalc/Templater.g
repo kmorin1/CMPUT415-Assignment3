@@ -102,28 +102,32 @@ expression returns [String name]
 @after {
 	//counter++;
 }
-  : ^(Equals expression expression)
-  | ^(NEquals expression expression)
-  | ^(LThan expression expression)
-  | ^(GThan expression expression) 
+  : ^(Equals x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> equals(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  | ^(NEquals x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  | ^(LThan x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  | ^(GThan x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter}) 
   | ^(Add x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
-  | ^(Subtract expression expression)
-  | ^(Multiply expression expression)
-  | ^(Divide expression expression)
-  | ^(INDEX index=expression vector=expression)
-  | ^(Range min=atom max=atom)
-  | a=atom {$name = $a.name;}-> return(a={$a.st})
+  | ^(Subtract x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  | ^(Multiply x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  | ^(Divide x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  | ^(INDEX index=expression {counter++;}vector=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  | ^(Range x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  | a=atom {$name = $a.name; counter++;}-> return(a={$a.st})
   ;
   
 atom returns [String name]
+@init {
+	counter++;
+}
 @after {
 	//$name = counter;
 }
-  : Number {$name = Integer.toString(counter);} -> load(name={counter}, value={$Number.text})
-  | Identifier {$name = $Identifier.text;}
+  : Number {$name = Integer.toString(counter);} -> load_num(name={counter}, value={$Number.text})
+  | Identifier {$name = Integer.toString(counter);}
   {
     VariableSymbol vs = (VariableSymbol)currentScope.resolve($Identifier.text);
   }
+  -> load_var(name={counter}, var={$Identifier.text})
   | filter
   | generator
   | ^(SUBEXPR expression) {$name = $expression.name;} -> return(a={$expression.st})
