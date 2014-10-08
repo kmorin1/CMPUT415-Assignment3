@@ -105,7 +105,7 @@ public class Helper {
 			}
 			
 			for (int i = 0; i < maxSize - minSize; i++) {
-				vector.add(0);
+				vector.add(1);
 			}
 			
 			return new ReturnVector(vector);
