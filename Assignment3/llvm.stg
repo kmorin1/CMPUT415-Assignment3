@@ -2,6 +2,11 @@ group llvm;
 
 return(a) ::= "<a>"
 
+returnTwo(a, b) ::= <<
+<a>
+<b>
+>>
+
 declare(var, expr, name) ::= <<
 ;evaluating expression
 <expr>
@@ -138,6 +143,24 @@ div(expr1, expr2, name1, name2, result) ::= <<
 <expr2>
 %.<result> = udiv i32 %.<name1>, %.<name2>
 ;end add
+
+>>
+
+index(expr1, expr2, name1, name2, result) ::= <<
+;start index
+<expr1>
+<expr2>
+%.<result> = add i32 5, 0
+;end index
+
+>>
+
+range(expr1, expr2, name1, name2, result) ::= <<
+;start range
+<expr1>
+<expr2>
+%.<result> = add i32 5, 0
+;end range
 
 >>
 

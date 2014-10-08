@@ -102,16 +102,16 @@ expression returns [String name]
 @after {
 	//counter++;
 }
-  : ^(Equals x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> equals(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
-  | ^(NEquals x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> nEquals(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
-  | ^(LThan x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> lessThan(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
-  | ^(GThan x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> greaterThan(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter}) 
-  | ^(Add x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
-  | ^(Subtract x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> sub(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
-  | ^(Multiply x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> mul(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
-  | ^(Divide x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> div(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
-  | ^(INDEX index=expression {counter++;}vector=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
-  | ^(Range x=expression {counter++;}y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  : ^(Equals x=expression {counter++;} y=expression {counter++;}) {$name = Integer.toString(counter);}-> equals(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  | ^(NEquals x=expression {counter++;} y=expression {counter++;}) {$name = Integer.toString(counter);}-> nEquals(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  | ^(LThan x=expression {counter++;} y=expression {counter++;}) {$name = Integer.toString(counter);}-> lessThan(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  | ^(GThan x=expression {counter++;} y=expression {counter++;}) {$name = Integer.toString(counter);}-> greaterThan(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter}) 
+  | ^(Add x=expression {counter++;} y=expression {counter++;}) {$name = Integer.toString(counter);}-> add(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  | ^(Subtract x=expression {counter++;} y=expression {counter++;}) {$name = Integer.toString(counter);}-> sub(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  | ^(Multiply x=expression {counter++;} y=expression {counter++;}) {$name = Integer.toString(counter);}-> mul(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  | ^(Divide x=expression {counter++;} y=expression {counter++;}) {$name = Integer.toString(counter);}-> div(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  | ^(INDEX index=expression {counter++;} vector=expression {counter++;}) {$name = Integer.toString(counter);}-> index(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
+  | ^(Range x=expression {counter++;} y=expression {counter++;}) {$name = Integer.toString(counter);}-> range(expr1={$x.st}, expr2={$y.st}, name1={$x.name}, name2={$y.name}, result={counter})
   | a=atom {$name = $a.name; counter++;}-> return(a={$a.st})
   ;
   
@@ -128,12 +128,12 @@ atom returns [String name]
     VariableSymbol vs = (VariableSymbol)currentScope.resolve($Identifier.text);
   }
   -> load_var(name={counter}, var={$Identifier.text})
-  | filter
-  | generator
+  | filter {$name = $filter.name;} -> return(a={$filter.st})
+  | generator {$name = $generator.name;} -> return(a={$generator.st})
   | ^(SUBEXPR expression) {$name = $expression.name;} -> return(a={$expression.st})
   ;
   
-filter
+filter returns [String name]
 @init {
   currentScope = new LocalScope(currentScope);
 }
@@ -145,14 +145,14 @@ filter
 	   VariableSymbol vs = new VariableSymbol($Identifier.text, (Type)currentScope.resolve("int"));
      currentScope.define(vs);
   }
-  vector=expression
+  vector=expression {counter++;}
 
-  condition=expression
-
-  )
+  condition=expression {counter++;}
+  {$name = $condition.name;}
+  ) -> returnTwo(a={$vector.st}, b={$condition.st})
   ;
   
-generator
+generator returns [String name]
 @init {
   currentScope = new LocalScope(currentScope);
 } 
@@ -164,10 +164,10 @@ generator
 	  VariableSymbol vs = new VariableSymbol($Identifier.text, (Type)currentScope.resolve("int"));
 	  currentScope.define(vs);
 	}
-	vector=expression
+	vector=expression {counter++;}
 
-	apply=expression
-	
-	)
+	apply=expression {counter++;}
+	{$name = $apply.name;}
+	) -> returnTwo(a={$vector.st}, b={$apply.st})
 
 	;
