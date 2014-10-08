@@ -101,11 +101,23 @@ printStatement
   ;
 
 ifStatement
-  : ^(If expression subblock)
+  : ^(If expression
+  {
+    if ($expression.type.equals("vector")) {
+       throw new RuntimeException("If statement condition must be an integer");
+    }
+  }
+  subblock)
   ;
 
 loopStatement
-  : ^(Loop expression subblock)
+  : ^(Loop expression
+  {
+    if ($expression.type.equals("vector")) {
+       throw new RuntimeException("Loop statement condition must be an integer");
+    }
+  }
+  subblock)
   ;
 
 expression returns [String type]
@@ -195,7 +207,19 @@ filter
 	   VariableSymbol vs = new VariableSymbol($Identifier.text, (Type)currentScope.resolve("int"));
      currentScope.define(vs);
   }
-  vector=expression condition=expression)
+  vector=expression
+  {
+    if ($vector.type.equals("int")) {
+       throw new RuntimeException("Filter domain must be a vector");
+    }
+  }
+  condition=expression
+  {
+    if ($condition.type.equals("vector")) {
+       throw new RuntimeException("Filter predicate must be an integer");
+    }
+  }
+  )
   ;
   
 generator
@@ -210,5 +234,17 @@ generator
 	  VariableSymbol vs = new VariableSymbol($Identifier.text, (Type)currentScope.resolve("int"));
 	  currentScope.define(vs);
 	}
-	vector=expression apply=expression) 
+	vector=expression
+	{
+    if ($vector.type.equals("int")) {
+       throw new RuntimeException("Generator domain must be a vector");
+    }
+  }
+  apply=expression
+  {
+    if ($apply.type.equals("vector")) {
+       throw new RuntimeException("Generator right hand side must be an integer");
+    }
+  }
+  ) 
 	;

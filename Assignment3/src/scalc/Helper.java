@@ -77,7 +77,7 @@ public class Helper {
 			return this.equals(vecta, promoted);
 		}
 		else {
-			throw new RuntimeException("Failed checking equals!");
+			return null;
 		}
 	}
 	
@@ -120,7 +120,7 @@ public class Helper {
 			return this.nEquals(vecta, promoted);
 		}
 		else {
-			throw new RuntimeException("Failed checking not equals!");
+			return null;
 		}
 	}
 	
@@ -158,7 +158,7 @@ public class Helper {
 			return this.lessThan(vecta, promoted);
 		}
 		else {
-			throw new RuntimeException("Failed less than!");
+			return null;
 		}
 	}
 	
@@ -196,7 +196,7 @@ public class Helper {
 			return this.greaterThan(vecta, promoted);
 		}
 		else {
-			throw new RuntimeException("Failed greater than!");
+			return null;
 		}
 	}
 	
@@ -231,7 +231,7 @@ public class Helper {
 			return this.add(vecta, promoted);
 		}
 		else {
-			throw new RuntimeException("Failed addition!");
+			return null;
 		}
 	}
 	
@@ -266,7 +266,7 @@ public class Helper {
 			return this.subtract(vecta, promoted);
 		}
 		else {
-			throw new RuntimeException("Failed subtraction!");
+			return null;
 		}
 	}
 	
@@ -301,7 +301,7 @@ public class Helper {
 			return this.multiply(vecta, promoted);
 		}
 		else {
-			throw new RuntimeException("Failed multiplication!");
+			return null;
 		}
 	}
 	
@@ -340,7 +340,7 @@ public class Helper {
 			return this.divide(vecta, promoted);
 		}
 		else {
-			throw new RuntimeException("Failed division!");
+			return null;
 		}
 	}
 	
@@ -361,9 +361,9 @@ public class Helper {
 			}
 		}
 		else if (vector != null && vectIndex != null) {
-			int maxSize = vector.size() > vectIndex.size() ? vector.size() : vectIndex.size();
-			ArrayList<Integer> result = new ArrayList<Integer>(maxSize);
-			for (int i = 0; i < maxSize; i++) {
+			int size = vectIndex.size();
+			ArrayList<Integer> result = new ArrayList<Integer>(size);
+			for (int i = 0; i < size; i++) {
 				int index = vectIndex.size() > i ? vectIndex.value.get(i) : -1;
 				ReturnInt item = (ReturnInt)this.index(vector, new ReturnInt(index));
 				result.add(item.value);
@@ -372,7 +372,7 @@ public class Helper {
 			return new ReturnVector(result);
 		}
 		else {
-			throw new RuntimeException("Failed index!");
+			return null;
 		}
 	}
 }

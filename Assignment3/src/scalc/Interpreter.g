@@ -172,12 +172,12 @@ filter returns [ReturnValue value]
   }
   condition=expression
   {
-    if ($condition.value instanceof ReturnVector)
+    if ($condition.value != null && $condition.value instanceof ReturnVector)
     {
       throw new RuntimeException("Filter condition must be an integer");
     }
     
-    if (!helper.equalsZero($condition.value)) {
+    if ($condition.value != null && !helper.equalsZero($condition.value)) {
       int toAdd = ((ReturnInt)vs.value).value;
       result.add(toAdd);
     }
@@ -237,13 +237,16 @@ generator returns [ReturnValue value]
 	}
 	apply=expression
 	{
+	
 	  if ($apply.value instanceof ReturnVector)
 	  {
 	    throw new RuntimeException("Generator must generate integers");
 	  }
 	  
 	  ReturnInt toAdd = (ReturnInt)$apply.value;
-	  result.add(toAdd.value);
+	  if (toAdd != null) {
+	    result.add(toAdd.value);
+	  }
 	  
 	  while (index < domainSize)
 	  {
