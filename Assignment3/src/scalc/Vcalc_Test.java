@@ -35,9 +35,6 @@ public class Vcalc_Test {
 			ParserParser parser = new ParserParser(tokenStream);
 			ParserParser.program_return entry = parser.program();
 			CommonTree ast = (CommonTree)entry.getTree();
-			
-			System.out.println("Passed Parser, AST:");
-			System.out.println(ast.toStringTree());
 
 			SymbolTable symtab = new SymbolTable();
 			
@@ -46,7 +43,6 @@ public class Vcalc_Test {
 		    nodes.setTokenStream(tokenStream);
 		    Defined defined = new Defined(nodes, symtab);
 		    defined.program();
-		    System.out.println("Passed Defined");
 			
 			if (args[1].equals("int")) {
 				// Run it through the Interpreter
