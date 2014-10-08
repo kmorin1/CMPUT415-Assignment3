@@ -1,0 +1,17 @@
+vector j = filter(i in 1..10 | i > 5);
+vector i = [i in j | i * 2];
+vector h = [i in 1..3 | i * 2];
+vector g = [i in 1..3 | i - 2];
+int k = filter(i in 1..10 | i > 2)[0];
+int l = [g in i | g /10 ][4];
+int m = [i in 1..10 | [j in 1..10 | j * 2][i]][0];
+print(j);
+print(i);
+print(k);
+print(l);
+print(m);
+print(filter(i in 1..10 | i + [j in 4..5 | j ][0] == 5));
+print([i in j | i * i] + [j in i | j * j]);
+print((1..10)[h]);
+print((1..4)[h]);
+print((1..4)[g]);

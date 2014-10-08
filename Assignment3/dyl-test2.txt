@@ -1,0 +1,18 @@
+int i = 5 + 90 + 4;
+int j = 100 - 90 - 5;
+int k = 7 * j;
+int l = 10 / 5;
+print(i);
+print(j);
+print(k);
+print(l);
+print(j + l + 2);
+print(j * l / 2);
+print(l - j - k - i);
+print(j < l);
+print(j > l);
+print(j == l);
+print(j != l);
+print(j == (l + 3));
+print(j != (l + 3));
+print((((i - 90) / (l + 1)) * (l + 1 + l) * ((l)) - (l < l * 2) - (l == l)));
