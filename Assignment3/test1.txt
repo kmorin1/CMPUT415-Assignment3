@@ -1,5 +1,0 @@
-int i = 1;
-int p = 1;
-vector v = 1..10;
-
-v = [h in 1..100 | h * p];

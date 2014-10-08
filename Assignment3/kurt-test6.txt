@@ -1,0 +1,4 @@
+vector v = 1..10;
+vector r = [v in 1..5 | [i in 1..15 | v][0]];
+print(r);
+print(v);

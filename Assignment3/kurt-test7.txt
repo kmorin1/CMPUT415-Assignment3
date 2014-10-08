@@ -1,0 +1,2 @@
+vector v = 1..10;
+vector j = [i in 1..10 | v];
