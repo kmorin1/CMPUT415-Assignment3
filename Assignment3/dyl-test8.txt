@@ -1,0 +1,22 @@
+int i = 2;
+int j = 2;
+int k = 2;
+int l = 2;
+int counter = 0;
+loop(i > 0)
+	i = i - 1;
+	j = 2;
+	loop(j > 0)
+		j = j - 1;
+		k = 2;
+		loop(k > 0)
+			k = k - 1;
+			l = 2;
+			loop(l > 0)
+				l = l - 1;
+				counter = counter + 1;
+				print(counter);
+			pool;
+		pool;
+	pool;
+pool;
