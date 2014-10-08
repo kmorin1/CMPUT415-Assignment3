@@ -1,4 +1,4 @@
-package scalc;
+package vcalc;
 
 public class BuiltInTypeSymbol extends Symbol
 	implements Type {

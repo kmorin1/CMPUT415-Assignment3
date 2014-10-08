@@ -9,7 +9,7 @@ options {
 
 @header
 {
-  package scalc;
+  package vcalc;
 }
 
 @members

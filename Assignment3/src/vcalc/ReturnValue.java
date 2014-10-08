@@ -1,4 +1,4 @@
-package scalc;
+package vcalc;
 
 public class ReturnValue {
 

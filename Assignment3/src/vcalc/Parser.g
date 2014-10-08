@@ -19,12 +19,12 @@ tokens {
 
 @header
 {
-  package scalc;
+  package vcalc;
 }
 
 @lexer::header
 {
-  package scalc;
+  package vcalc;
 }
 
 @members

@@ -1,4 +1,4 @@
-package scalc;
+package vcalc;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;

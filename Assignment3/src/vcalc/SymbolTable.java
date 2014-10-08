@@ -1,4 +1,4 @@
-package scalc;
+package vcalc;
 
 public class SymbolTable {
 	GlobalScope globals = new GlobalScope();

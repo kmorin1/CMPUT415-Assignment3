@@ -1,4 +1,4 @@
-package scalc;
+package vcalc;
 
 public interface Scope {
 	public String getScopeName(); 
